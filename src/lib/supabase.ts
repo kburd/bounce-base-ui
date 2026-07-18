@@ -1,7 +1,7 @@
 import { createClient } from '@supabase/supabase-js'
 import type { Bounce, BounceCategory, BounceUseType } from '../types/bounce'
 
-export const INVENTORY_TABLE_NAME = 'candidate_extractions'
+export const INVENTORY_TABLE_NAME = 'extracted_inventory_items'
 export const INVENTORY_RESULT_LIMIT = 500
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL?.trim()
