@@ -1,28 +1,37 @@
+import { useMemo, useState } from 'react'
 import './App.css'
+import { BounceCard } from './components/BounceCard'
+import { BounceDetailModal } from './components/BounceDetailModal'
+import { EmptyState } from './components/EmptyState'
+import { ErrorState } from './components/ErrorState'
+import { FilterBar } from './components/FilterBar'
+import { Header } from './components/Header'
+import { LoadingState } from './components/LoadingState'
+import { defaultFilters, filterBounces, hasActiveFilters } from './lib/filterBounces'
+import { useBounces } from './hooks/useBounces'
+import type { Bounce, BounceFilters } from './types/bounce'
 
 function App() {
-  return (
-    <main className="landing-page" aria-labelledby="page-title">
-      <section className="hero-card">
-        <div className="catalog-illustration" aria-hidden="true">
-          <div className="bounce-house">
-            <span className="roof" />
-            <span className="tower tower-left" />
-            <span className="tower tower-right" />
-            <span className="door" />
-          </div>
-          <div className="catalog-lines">
-            <span />
-            <span />
-            <span />
-          </div>
-        </div>
+  const { bounces, isLoading, error, retry } = useBounces()
+  const [filters, setFilters] = useState<BounceFilters>(defaultFilters)
+  const [selectedBounce, setSelectedBounce] = useState<Bounce | null>(null)
+  const activeFilters = hasActiveFilters(filters)
+  const filteredBounces = useMemo(() => filterBounces(bounces, filters), [bounces, filters])
 
-        <p className="eyebrow">Rental inventory marketplace</p>
-        <h1 id="page-title">Bounce Base</h1>
-        <p className="tagline">Find and compare bounce house rentals near you.</p>
-        <p className="status">Inventory search is coming soon.</p>
-      </section>
+  return (
+    <main className="app-shell" aria-labelledby="page-title">
+      <Header />
+      {isLoading && <LoadingState />}
+      {!isLoading && error && <ErrorState onRetry={retry} />}
+      {!isLoading && !error && bounces.length === 0 && <EmptyState title="No bounce inventory is currently available." />}
+      {!isLoading && !error && bounces.length > 0 && (
+        <>
+          <FilterBar filters={filters} bounces={bounces} hasActiveFilters={activeFilters} onChange={setFilters} onClear={() => setFilters(defaultFilters)} />
+          <p className="result-count" role="status">Showing {filteredBounces.length} of {bounces.length} products</p>
+          {filteredBounces.length === 0 ? <EmptyState title="No products match the selected filters." message="Try broadening your search or clearing filters." actionLabel="Clear filters" onAction={() => setFilters(defaultFilters)} /> : <section className="card-grid" aria-label="Bounce inventory results">{filteredBounces.map((bounce) => <BounceCard key={`${bounce.id}-${bounce.product_url ?? bounce.name}`} bounce={bounce} onSelect={setSelectedBounce} />)}</section>}
+        </>
+      )}
+      {selectedBounce && <BounceDetailModal bounce={selectedBounce} onClose={() => setSelectedBounce(null)} />}
     </main>
   )
 }

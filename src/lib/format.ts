@@ -1,0 +1,1 @@
+export const formatPrice = (price: number | null) => price == null ? 'Price unavailable' : new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(price)
