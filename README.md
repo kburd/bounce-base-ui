@@ -4,27 +4,27 @@ Bounce Base is a proof-of-concept React catalog for browsing extracted bounce-ho
 
 ## Supabase configuration
 
-The frontend uses the Supabase anonymous key and reads these Vite environment variables:
+The frontend uses Supabase's publishable key and reads these Vite environment variables:
 
 ```text
 VITE_SUPABASE_URL=
-VITE_SUPABASE_ANON_KEY=
+VITE_SUPABASE_PUBLISHABLE_KEY=
 ```
 
-Create a local `.env` from `.env.example`:
+Create a local `.env`:
 
 ```bash
-cp .env.example .env
+cp .env
 ```
 
 Example local values:
 
 ```bash
 VITE_SUPABASE_URL=https://your-project.supabase.co
-VITE_SUPABASE_ANON_KEY=your-anon-key
+VITE_SUPABASE_PUBLISHABLE_KEY=your-publishable-key
 ```
 
-Never expose or commit a Supabase service-role key in this frontend application. The Supabase table must allow read access through an appropriate Row Level Security policy for the anonymous client.
+Only the project URL and publishable key belong in this frontend configuration. Never expose or commit a Supabase secret key (or legacy service-role key) in a browser app; keep it on a trusted server. The Supabase table must allow read access through an appropriate Row Level Security policy for the publishable client.
 
 Inventory is read from the `candidate_extractions` table. Change the table name in `src/lib/supabase.ts` by updating `INVENTORY_TABLE_NAME`. The proof-of-concept query currently loads up to `500` records, configured as `INVENTORY_RESULT_LIMIT` in the same file.
 

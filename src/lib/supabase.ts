@@ -1,16 +1,18 @@
 import { createClient } from '@supabase/supabase-js'
 import type { Bounce, BounceCategory, BounceUseType } from '../types/bounce'
 
-export const INVENTORY_TABLE_NAME = 'extracted_inventory_items'
+export const INVENTORY_TABLE_NAME = 'company_inventory'
+export const COMPANY_TABLE_NAME = 'companies'
+export const COMPANY_URL_TABLE_NAME = 'company_urls'
 export const INVENTORY_RESULT_LIMIT = 500
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL?.trim()
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY?.trim()
+const supabasePublishableKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY?.trim()
 
-export const hasSupabaseConfig = Boolean(supabaseUrl && supabaseAnonKey)
+export const hasSupabaseConfig = Boolean(supabaseUrl && supabasePublishableKey)
 
 export const supabase = hasSupabaseConfig
-  ? createClient(supabaseUrl, supabaseAnonKey)
+  ? createClient(supabaseUrl, supabasePublishableKey)
   : null
 
 const cleanText = (value: unknown): string | null => {
@@ -21,7 +23,7 @@ const cleanText = (value: unknown): string | null => {
 
 const normalizeCategory = (value: unknown): BounceCategory => {
   const category = cleanText(value)
-  if (category === 'Bouncer' || category === 'Combo' || category === 'Slide' || category === 'Obstacle Course' || category === 'Game') return category
+  if (category === 'BounceHouse' || category === 'Combo' || category === 'WaterSlide' || category === 'ObstacleCourse' || category === 'Game') return category
   return 'Unknown'
 }
 
@@ -50,30 +52,72 @@ export const isValidHttpUrl = (value: string | null | undefined) => {
   }
 }
 
-const normalizeBounce = (record: Record<string, unknown>): Bounce => ({
+const normalizeBounce = (
+  record: Record<string, unknown>,
+  companyNames: Map<string, string>,
+  productUrls: Map<string, string>,
+): Bounce => ({
   id: record.id as string | number,
   name: cleanText(record.name) ?? 'Unnamed bounce rental',
-  company: cleanText(record.company) ?? 'Unknown company',
+  company: companyNames.get(String(record.company_id)) ?? 'Unknown company',
   category: normalizeCategory(record.category),
   use_type: normalizeUseType(record.use_type),
   price: normalizePrice(record.price),
   size: cleanText(record.size),
   image_url: isValidHttpUrl(cleanText(record.image_url)) ? cleanText(record.image_url) : null,
-  product_url: isValidHttpUrl(cleanText(record.product_url)) ? cleanText(record.product_url) : null,
+  product_url: isValidHttpUrl(productUrls.get(String(record.company_url_id)))
+    ? productUrls.get(String(record.company_url_id)) ?? null
+    : null,
 })
 
 export async function fetchBounces(): Promise<Bounce[]> {
   if (!supabase) {
-    throw new Error('Missing Supabase configuration. Add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY to .env.')
+    throw new Error('Missing Supabase configuration. Add VITE_SUPABASE_URL and VITE_SUPABASE_PUBLISHABLE_KEY to .env.')
   }
 
   const { data, error } = await supabase
     .from(INVENTORY_TABLE_NAME)
-    .select('id,name,company,category,use_type,price,size,image_url,product_url')
-    .order('company', { ascending: true })
+    .select('id,name,company_id,company_url_id,category,use_type,price,size,image_url')
+    .order('company_id', { ascending: true })
     .order('name', { ascending: true })
     .limit(INVENTORY_RESULT_LIMIT)
 
   if (error) throw error
-  return (data ?? []).map((record) => normalizeBounce(record))
+
+  const inventory = data ?? []
+  if (inventory.length === 0) return []
+
+  const companyIds = [...new Set(inventory.map((record) => record.company_id).filter((id) => id != null))]
+  const { data: companies, error: companiesError } = await supabase
+    .from(COMPANY_TABLE_NAME)
+    .select('id,name')
+    .in('id', companyIds)
+
+  if (companiesError) throw companiesError
+
+  const companyUrlIds = [...new Set(inventory.map((record) => record.company_url_id).filter((id) => id != null))]
+  const { data: companyUrls, error: companyUrlsError } = companyUrlIds.length
+    ? await supabase
+      .from(COMPANY_URL_TABLE_NAME)
+      .select('id,url')
+      .in('id', companyUrlIds)
+    : { data: [], error: null }
+
+  if (companyUrlsError) throw companyUrlsError
+
+  const companyNames = new Map(
+    (companies ?? []).flatMap((company) => {
+      const name = cleanText(company.name)
+      return name ? [[String(company.id), name] as const] : []
+    }),
+  )
+
+  const productUrls = new Map(
+    (companyUrls ?? []).flatMap((companyUrl) => {
+      const url = cleanText(companyUrl.url)
+      return url ? [[String(companyUrl.id), url] as const] : []
+    }),
+  )
+
+  return inventory.map((record) => normalizeBounce(record, companyNames, productUrls))
 }
