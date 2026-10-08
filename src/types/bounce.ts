@@ -1,4 +1,4 @@
-export type BounceCategory = 'Bouncer' | 'Combo' | 'Slide' | 'Obstacle Course' | 'Game' | 'Unknown'
+export type BounceCategory = 'BounceHouse' | 'Combo' | 'WaterSlide' | 'ObstacleCourse' | 'Game' | 'Unknown'
 export type BounceUseType = 'Dry' | 'Wet' | 'Both' | 'Unknown'
 
 export type Bounce = {
