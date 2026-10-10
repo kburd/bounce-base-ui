@@ -1,7 +1,16 @@
 import type { Bounce, BounceFilters } from '../types/bounce'
 
-const schemaCategories = ['Bouncer', 'Combo', 'Slide', 'Obstacle Course', 'Game', 'Unknown']
+const schemaCategories = ['BounceHouse', 'Combo', 'WaterSlide', 'ObstacleCourse', 'Game', 'Unknown']
 const schemaUseTypes = ['Dry', 'Wet', 'Both', 'Unknown']
+const categoryLabels: Record<string, string> = {
+  BounceHouse: 'Bounce House',
+  Combo: 'Combo',
+  WaterSlide: 'Water Slide',
+  ObstacleCourse: 'Obstacle Course',
+  Game: 'Game',
+  Unknown: 'Unknown',
+  'Combo|WaterSlide': 'Combos & Slides',
+}
 
 type Props = { filters: BounceFilters; bounces: Bounce[]; hasActiveFilters: boolean; onChange: (filters: BounceFilters) => void; onClear: () => void }
 const update = (filters: BounceFilters, key: keyof BounceFilters, value: string) => ({ ...filters, [key]: value })
@@ -17,7 +26,7 @@ export function FilterBar({ filters, bounces, hasActiveFilters, onChange, onClea
       <div className="filters-header"><h2 id="filters-title">Filter catalog</h2>{hasActiveFilters && <button className="secondary" onClick={onClear}>Clear filters</button>}</div>
       <div className="filter-grid">
         <label>Search<input type="search" value={filters.search} onChange={(e) => onChange(update(filters, 'search', e.target.value))} placeholder="Name or company" /></label>
-        <label>Category<select value={filters.category} onChange={(e) => onChange(update(filters, 'category', e.target.value))}><option value="">All categories</option>{categories.map((c) => <option key={c} value={c}>{c}</option>)}</select></label>
+        <label>Category<select value={filters.category} onChange={(e) => onChange(update(filters, 'category', e.target.value))}><option value="">All categories</option>{categories.map((c) => <option key={c} value={c}>{categoryLabels[c] ?? c}</option>)}<option value="Combo|WaterSlide">Combos &amp; Slides</option></select></label>
         <label>Use type<select value={filters.useType} onChange={(e) => onChange(update(filters, 'useType', e.target.value))}><option value="">All use types</option>{useTypes.map((u) => <option key={u} value={u}>{u}</option>)}</select></label>
         <label>Company<select value={filters.company} onChange={(e) => onChange(update(filters, 'company', e.target.value))}><option value="">All companies</option>{companies.map((c) => <option key={c} value={c}>{c}</option>)}</select></label>
         <label>Min price<input type="number" min="0" inputMode="numeric" value={filters.minPrice} onChange={(e) => onChange(update(filters, 'minPrice', e.target.value))} placeholder="No min" /></label>

@@ -11,7 +11,7 @@ export function filterBounces(bounces: Bounce[], filters: BounceFilters) {
 
   return bounces.filter((bounce) => {
     if (search && !`${bounce.name} ${bounce.company}`.toLowerCase().includes(search)) return false
-    if (filters.category && bounce.category !== filters.category) return false
+    if (filters.category && !filters.category.split('|').includes(bounce.category)) return false
     if (filters.useType && bounce.use_type !== filters.useType) return false
     if (filters.company && bounce.company !== filters.company) return false
     if (hasPriceFilter) {
