@@ -1,5 +1,6 @@
 import type { MouseEvent } from 'react'
 import { defaultFilters } from '../lib/filterBounces'
+import type { AiSearchResponse } from '../lib/aiSearch'
 import type { Bounce, BounceFilters } from '../types/bounce'
 import { BounceImage } from './BounceImage'
 import { NaturalLanguageSearch } from './NaturalLanguageSearch'
@@ -7,6 +8,7 @@ import { NaturalLanguageSearch } from './NaturalLanguageSearch'
 type Props = {
   bounces: Bounce[]
   onNavigate: (filters: BounceFilters) => void
+  onAiSearchResponse: (response: AiSearchResponse) => void
   catalogHref: (filters: BounceFilters) => string
 }
 
@@ -23,7 +25,7 @@ function followCatalogLink(event: MouseEvent<HTMLAnchorElement>, filters: Bounce
   onNavigate(filters)
 }
 
-export function HomePage({ bounces, onNavigate, catalogHref }: Props) {
+export function HomePage({ bounces, onNavigate, onAiSearchResponse, catalogHref }: Props) {
   const pricePresets = [
     { label: 'Under $300', detail: 'Up to $299.99', filters: { ...defaultFilters, maxPrice: '299.99' } },
     { label: '$300–$500', detail: 'Compare rentals from $300 to $500', filters: { ...defaultFilters, minPrice: '300', maxPrice: '500' } },
@@ -37,7 +39,7 @@ export function HomePage({ bounces, onNavigate, catalogHref }: Props) {
       </section>
 
       <div className="home-discovery-grid">
-        <NaturalLanguageSearch />
+        <NaturalLanguageSearch onSearchResponse={onAiSearchResponse} />
 
         <section className="discovery-section category-section" aria-labelledby="categories-title">
           <div className="section-heading">

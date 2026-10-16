@@ -1,23 +1,29 @@
-import { useState, type FormEvent, type KeyboardEvent } from 'react'
-import { AISearchNotImplementedError, submitNaturalLanguageSearch } from '../lib/aiSearch'
+import { useRef, useState, type FormEvent, type KeyboardEvent } from 'react'
+import { submitNaturalLanguageSearch, type AiSearchResponse } from '../lib/aiSearch'
 
 type SearchStatus = 'idle' | 'loading' | 'success' | 'not-implemented' | 'error'
+type Props = { onSearchResponse: (response: AiSearchResponse) => void }
 
-export function NaturalLanguageSearch() {
+export function NaturalLanguageSearch({ onSearchResponse }: Props) {
   const [request, setRequest] = useState('')
   const [status, setStatus] = useState<SearchStatus>('idle')
+  const isSubmitting = useRef(false)
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     const trimmedRequest = request.trim()
-    if (!trimmedRequest || status === 'loading') return
+    if (!trimmedRequest || isSubmitting.current) return
 
+    isSubmitting.current = true
     setStatus('loading')
     try {
-      await submitNaturalLanguageSearch(trimmedRequest)
-      setStatus('success')
-    } catch (error) {
-      setStatus(error instanceof AISearchNotImplementedError ? 'not-implemented' : 'error')
+      const response = await submitNaturalLanguageSearch(trimmedRequest)
+      setStatus(response.implemented ? 'success' : 'not-implemented')
+      onSearchResponse(response)
+    } catch {
+      setStatus('error')
+    } finally {
+      isSubmitting.current = false
     }
   }
 
@@ -29,13 +35,13 @@ export function NaturalLanguageSearch() {
   }
 
   const statusMessage = status === 'loading'
-    ? 'Submitting your request…'
+    ? 'Contacting AI search…'
     : status === 'success'
-      ? 'Your request was submitted. Search criteria will be available once the API contract is defined.'
+      ? 'Your AI search request was processed.'
       : status === 'not-implemented'
-        ? 'Natural-language search is not connected yet. Your request is saved here so you can try again later.'
+        ? 'AI search is not available yet. Please browse the catalog while we work on this feature.'
         : status === 'error'
-          ? 'We couldn’t submit your request. Please try again later.'
+          ? 'We couldn’t connect to AI search. Please check your connection and try again.'
         : ''
 
   return (
@@ -47,7 +53,7 @@ export function NaturalLanguageSearch() {
           <h2 id="ai-search-title">Tell us what you’re looking for</h2>
         </div>
       </div>
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} aria-busy={status === 'loading'}>
         <label className="sr-only" htmlFor="natural-language-request">Describe the bounce house rental you want</label>
         <textarea
           id="natural-language-request"
@@ -64,7 +70,8 @@ export function NaturalLanguageSearch() {
         <div className="ai-search-footer">
           <p id="ai-search-help">Describe the style, features, or budget you have in mind.</p>
           <button className="ai-search-submit" type="submit" disabled={!request.trim() || status === 'loading'}>
-            {status === 'loading' ? 'Submitting…' : 'Find my bounce house'}
+            {status === 'loading' && <span className="search-spinner" aria-hidden="true" />}
+            {status === 'loading' ? 'Searching…' : 'Find my bounce house'}
           </button>
         </div>
         <p id="ai-search-status" className={`ai-search-status ${status}`} role="status" aria-live="polite">{statusMessage}</p>

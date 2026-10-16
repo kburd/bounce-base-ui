@@ -2,14 +2,12 @@ import { useCallback, useEffect, useState } from 'react'
 import { fetchBounces } from '../lib/supabase'
 import type { Bounce } from '../types/bounce'
 
-export function useBounces() {
+export function useBounces(enabled = true) {
   const [bounces, setBounces] = useState<Bounce[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
   const loadBounces = useCallback(async () => {
-    setIsLoading(true)
-    setError(null)
     try {
       setBounces(await fetchBounces())
     } catch (err) {
@@ -21,8 +19,15 @@ export function useBounces() {
   }, [])
 
   useEffect(() => {
+    if (!enabled) return
+    void loadBounces()
+  }, [enabled, loadBounces])
+
+  const retry = useCallback(() => {
+    setIsLoading(true)
+    setError(null)
     void loadBounces()
   }, [loadBounces])
 
-  return { bounces, isLoading, error, retry: loadBounces }
+  return { bounces, isLoading, error, retry }
 }

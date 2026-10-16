@@ -20,4 +20,5 @@ export type BounceFilters = {
   company: string
   minPrice: string
   maxPrice: string
+  size: string
 }

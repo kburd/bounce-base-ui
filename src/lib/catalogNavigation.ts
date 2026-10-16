@@ -3,7 +3,7 @@ import type { BounceFilters } from '../types/bounce'
 
 export type AppRoute = { view: 'home' | 'catalog'; filters: BounceFilters }
 
-const filterKeys: (keyof BounceFilters)[] = ['search', 'category', 'useType', 'company', 'minPrice', 'maxPrice']
+const filterKeys: (keyof BounceFilters)[] = ['search', 'category', 'useType', 'company', 'minPrice', 'maxPrice', 'size']
 
 export function readAppRoute(location: Pick<Location, 'search'>): AppRoute {
   const params = new URLSearchParams(location.search)

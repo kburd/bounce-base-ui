@@ -1,6 +1,6 @@
 import type { Bounce, BounceFilters } from '../types/bounce'
 
-export const defaultFilters: BounceFilters = { search: '', category: '', useType: '', company: '', minPrice: '', maxPrice: '' }
+export const defaultFilters: BounceFilters = { search: '', category: '', useType: '', company: '', minPrice: '', maxPrice: '', size: '' }
 export const hasActiveFilters = (filters: BounceFilters) => Object.values(filters).some((value) => value.trim() !== '')
 
 export function filterBounces(bounces: Bounce[], filters: BounceFilters) {

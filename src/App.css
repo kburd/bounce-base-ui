@@ -16,6 +16,15 @@ button, .primary-link { border-radius: 999px; cursor: pointer; font-weight: 800;
 button:focus-visible, input:focus-visible, select:focus-visible, a:focus-visible { outline: 3px solid #f97316; outline-offset: 3px; }
 .secondary { background: #f8fafc; border: 1px solid #cbd5e1; color: #0f172a; }
 .result-count { color: #334155; font-weight: 800; margin: 1.25rem 0; }
+.search-controls { align-items: end; display: flex; flex-wrap: wrap; gap: .9rem; justify-content: flex-end; margin: 1rem 0; }
+.search-controls label { min-width: 180px; }
+.active-search { background: rgba(255,255,255,.82); border: 1px solid rgba(15,23,42,.09); border-radius: 18px; margin-top: 1rem; padding: 1rem; }
+.active-search h2 { font-size: 1rem; margin: 0 0 .7rem; }
+.active-search-chips { display: flex; flex-wrap: wrap; gap: .5rem; }
+.filter-chip { background: #e0f2fe; border: 1px solid #bae6fd; color: #0c4a6e; font-size: .82rem; min-height: 36px; padding: .45rem .75rem; }
+.clear-search { margin-top: .7rem; }
+.pagination { align-items: center; display: flex; gap: 1rem; justify-content: center; margin: 1.5rem 0; }
+.pagination span { color: #334155; font-weight: 800; }
 .card-grid { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); }
 .bounce-card { background: #fff; border: 1px solid rgba(15,23,42,.22); border-radius: 22px; box-shadow: 0 14px 34px rgba(15,23,42,.10); color: inherit; overflow: hidden; padding: 0; text-align: left; transition: transform .18s ease, box-shadow .18s ease; width: 100%; }
 .bounce-card:hover { box-shadow: 0 20px 45px rgba(15,23,42,.15); transform: translateY(-3px); }
@@ -67,6 +76,9 @@ dd { font-weight: 800; margin: .15rem 0 0; }
 .ai-search-footer p { color: #64748b; font-size: .85rem; line-height: 1.4; margin: 0; }
 .ai-search-submit { background: #0284c7; border: 1px solid #075985; color: white; flex: 0 0 auto; }
 .ai-search-submit:disabled { cursor: not-allowed; opacity: .55; }
+.search-spinner { animation: search-spin .75s linear infinite; border: 2px solid rgba(255,255,255,.45); border-radius: 50%; border-top-color: #fff; display: inline-block; height: 1rem; margin-right: .5rem; vertical-align: -.15rem; width: 1rem; }
+@keyframes search-spin { to { transform: rotate(360deg); } }
+.ai-search-notice { background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 14px; color: #1e3a8a; margin: 0 0 1rem; padding: .85rem 1rem; }
 .ai-search-status { color: #475569; font-size: .9rem; line-height: 1.45; margin: .75rem 0 0; }
 .ai-search-status:empty { display: none; }
 .ai-search-status.loading { color: #0369a1; }
